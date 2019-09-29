@@ -76,7 +76,7 @@ impl<B, E, Block: BlockT<Hash=H256>, RA, PRA, SC> JustificationImport<Block>
 {
 	type Error = ConsensusError;
 
-	fn on_start(&self, link: &::consensus_common::import_queue::Link<Block>) {
+	fn on_start(&self, link: &dyn ::consensus_common::import_queue::Link<Block>) {
 		let chain_info = match self.inner.info() {
 			Ok(info) => info.chain,
 			_ => return,
@@ -186,7 +186,7 @@ where
 			);
 
 			match maybe_change {
-				Err(e) => match api.has_api_with::<GrandpaApi<Block>, _>(&at, |v| v >= 2) {
+				Err(e) => match api.has_api_with::<dyn GrandpaApi<Block>, _>(&at, |v| v >= 2) {
 					Err(e) => return Err(ConsensusErrorKind::ClientImport(e.to_string()).into()),
 					Ok(true) => {
 						// API version is high enough to support forced changes

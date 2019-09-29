@@ -205,6 +205,7 @@ pub trait BlockStatus<Block: BlockT> {
 	fn block_number(&self, hash: Block::Hash) -> Result<Option<NumberFor<Block>>, Error>;
 }
 
+/// 为Arc<Client<>>实现了该trait
 impl<B, E, Block: BlockT<Hash=H256>, RA> BlockStatus<Block> for Arc<Client<B, E, Block, RA>> where
 	B: Backend<Block, Blake2Hasher>,
 	E: CallExecutor<Block, Blake2Hasher> + Send + Sync,
@@ -220,9 +221,13 @@ impl<B, E, Block: BlockT<Hash=H256>, RA> BlockStatus<Block> for Arc<Client<B, E,
 /// A new authority set along with the canonical block it changed at.
 #[derive(Debug)]
 pub(crate) struct NewAuthoritySet<H, N> {
+	/// 块序号
 	pub(crate) canon_number: N,
+	/// 块哈希
 	pub(crate) canon_hash: H,
+	/// 集合ID
 	pub(crate) set_id: u64,
+	/// 新的authority数组
 	pub(crate) authorities: Vec<(AuthorityId, u64)>,
 }
 
@@ -291,7 +296,9 @@ impl<H, N> fmt::Display for CommandOrError<H, N> {
 pub struct LinkHalf<B, E, Block: BlockT<Hash=H256>, RA, SC> {
 	client: Arc<Client<B, E, Block, RA>>,
 	select_chain: SC,
+	/// 在运行中持久的数据，包括authority_set，consensus_changes, voter_set_state
 	persistent_data: PersistentData<Block>,
+	/// 内存无界通道信息接受者
 	voter_commands_rx: mpsc::UnboundedReceiver<VoterCommand<Block::Hash, NumberFor<Block>>>,
 }
 
@@ -318,6 +325,7 @@ where
 	let chain_info = client.info()?;
 	let genesis_hash = chain_info.chain.genesis_hash;
 
+	// 从backend初始化persistent_data
 	let persistent_data = aux_schema::load_persistent(
 		&**client.backend(),
 		genesis_hash,

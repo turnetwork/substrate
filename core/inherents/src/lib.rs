@@ -56,6 +56,10 @@ pub type InherentIdentifier = [u8; 8];
 #[derive(Clone, Default)]
 pub struct InherentData {
 	/// All inherent data encoded with parity-codec and an identifier.
+	// pub struct BTreeMap<K, V> {
+	//    root: node::Root<K, V>,
+	//    length: usize,
+	//}
 	data: BTreeMap<InherentIdentifier, Vec<u8>>
 }
 
@@ -78,6 +82,7 @@ impl InherentData {
 		identifier: InherentIdentifier,
 		inherent: &I,
 	) -> Result<(), RuntimeString> {
+		// BTreeMap.entry()
 		match self.data.entry(identifier) {
 			Entry::Vacant(entry) => {
 				entry.insert(inherent.encode());
